@@ -1,0 +1,16 @@
+mixin video(info)
+        div 
+            h4 
+                a(href=`/videos/${info.id}`)=info.title
+            p=info.description
+            ul
+                each hashtag in info.hashtags 
+                    li=hashtag
+            small=info.createdAt
+            hr  
+            //#{info}이라고 써도 됨
+            //- ul 
+            //-     li #{info.ratings}/5
+            //-     li #{info.comments} comments.
+            //-     li Posted #{info.createdAt}
+            //-     li #{info.views} views.

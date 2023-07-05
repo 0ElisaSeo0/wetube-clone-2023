@@ -1,0 +1,13 @@
+extends base.pug
+include mixins/video
+
+
+block content 
+    div
+        p=video.description 
+        small=video.createdAt 
+        h3 #{video.meta.views} #{video.meta.views === 1 ? "view" : "views"}
+    div
+        a(href=`${video.id}/edit`) Edit Vidoes &rarr;   
+    div
+        a(href=`${video.id}/delete`) Delete Vidoes &rarr; 
