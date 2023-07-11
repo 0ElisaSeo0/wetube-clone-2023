@@ -164,27 +164,79 @@ export const getEdit = (req, res) => {
 export const postEdit = async (req, res) => {
   const {
     session: {
-      user: { _id },
+      user: { _id, avatarUrl },
     },
     body: { gender, birthday, username },
+    file,
   } = req;
-  // console.log(`userId: ${req.session.user.id}`);
+  console.log('file', file);
   // const id = req.session.user.id;
   // const { gender, birthday, username } = req.body;
-  console.log();
-  const existingUser = await User.findOne({ username: username });
-  if (existingUser._id != _id) {
+  const exist = await User.findOne({ username: username });
+  console.log('exist', exist);
+  if (exist._id != _id && exist.username === username) {
+    console.log('exist._id', exist._id);
+    console.log('_id', _id);
+    console.log('userError');
     return res.status(400).render('edit-profile', {
+      pageTitle: 'Edit Profile',
       errorMessage: 'The username is already taken.',
     });
   } else {
     const updatedUser = await User.findByIdAndUpdate(
       _id,
-      { gender, birthday, username },
+      {
+        avatarUrl: avatarUrl ? avatarUrl : file.path,
+        gender,
+        birthday,
+        username,
+      },
+      // { avatarUrl: path, gender, birthday, username },
       { new: true }
     );
     req.session.user = updatedUser;
+    console.log('updatedUser', updatedUser);
+    console.log('req.session.user', req.session.user);
     return res.render('edit-profile');
   }
+};
+
+export const getChangePassword = (req, res) => {
+  return res.render('users/change-password', { pageTitle: 'Change Password' });
+};
+export const postChangePassword = async (req, res) => {
+  const {
+    session: {
+      user: { _id, password },
+    },
+    body: { oldPassword, newPassword, newPassword2 },
+  } = req;
+  const ok = await bcrypt.compare(oldPassword, password);
+  if (!ok) {
+    return res.status(400).render('users/change-password', {
+      pageTitle: 'Change Password',
+      errorMessage: 'The current Password is incorrect',
+    });
+  }
+  if (newPassword !== newPassword2) {
+    return res.status(400).render('users/change-password', {
+      pageTitle: 'Change Password',
+      errorMessage: 'Password confirmation does not match',
+    });
+  }
+  try {
+    const user = await User.findById(_id);
+    user.password = newPassword;
+    await user.save();
+    req.session.user.password = user.password;
+    return res.redirect('/users/logout');
+  } catch (err) {
+    console.log(err);
+    return res.status(400).render('users/change-password', {
+      pageTitle: `Change Password`,
+      errorMessage: err._message,
+    });
+  }
+  return res.redirect('/');
 };
 export const see = (req, res) => res.send('See users');

@@ -3,8 +3,13 @@ extends base.pug
 block content 
     if errorMessage 
         span=errorMessage
-    form(method="POST")
+    form(method="POST", enctype="multipart/form-data")
+        label(for="avatar") Avatar
+        input(type="file", id="avatar", name="avatar", accept="image/*")
         input(placeholder="gender", name="gender", type="text", value=loggedInUser.gender)
         input(placeholder="birthday", name="birthday", type="date", value=loggedInUser.birthday)
         input(placeholder="username", name="username", type="text", value=loggedInUser.username)
-        input(type="submit", value="Update Profile")
+        input(type="submit", value="Update Profile") 
+        if !loggedInUser.socialOnly
+            hr 
+            a(href="change-password") Change password &rarr;
